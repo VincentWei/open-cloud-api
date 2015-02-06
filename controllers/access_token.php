@@ -2,15 +2,13 @@
 
 class Access_Token extends CI_Controller {
 
-	protected $_endpoint_get = '/access_token/get/{app_key}';
-
-	public function index() {
-		$usage = array (
-					'get_access_token' => $this->_endpoint_get,
+	protected $_endpoint_list = array (
+					'get_access_token' => '/access_token/get/{app_key}',
 				);
 
+	public function index() {
 		$this->output->set_content_type('application/json; charset=utf-8');
-		$data['usage'] = $usage;
+		$data['usage'] = $_endpoint_list;
 		$this->load->view('usage', $data);
 	}
 
@@ -30,7 +28,7 @@ class Access_Token extends CI_Controller {
 			}
 			else {
 				$this->output->set_content_type('application/json; charset=utf-8');
-				$data['endpoint'] = $this->_endpoint_get;
+				$data['endpoint'] = $this->_endpoint_list['get_access_token'];
 				$data['message'] = $token;
 				$this->load->view('message', $data);
 			}
