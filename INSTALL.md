@@ -13,6 +13,7 @@
 	* Set the configuration of your CodeIgniter installation, especically the database settings.
 
 1. Enable you web server for pretty URL to access the PHP scripts. If you are using Apache, you can enable mod_rewrite module of Apache and put the content bellow in `.htaccess` file in the top directory of your CodeIgniter installation:
+
 		<IfModule mod_rewrite.c>
 			RewriteEngine On
 			RewriteBase /
@@ -31,7 +32,7 @@
 		http://<www.examples.com>/install/create_tables
 		http://<www.examples.com>/install/create_test_app_key
 
-1.	Visit the following url in your browser to check the installation:
+1.	Visit the following URL in your browser to check the installation:
 
 		http://<www.examples.com>/list/computer_languages/items
 
