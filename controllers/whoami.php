@@ -58,7 +58,8 @@ class Whoami extends CI_Controller {
 		$this->load->view('message', $data);
 	}
 
-	public function browser () {
+	/* currently not work */
+	protected function browser () {
 		$this->output->set_content_type('application/json; charset=utf-8');
 		$data['endpoint'] = $this->_endpoint_list['return_my_browser'];
 		$data['items'] = get_browser (NULL, TRUE);
