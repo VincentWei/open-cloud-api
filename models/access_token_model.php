@@ -31,7 +31,7 @@ class Access_token_model extends CI_Model {
 
 	const TTL   = 36000;		// Time to live: 36000 seconds (10 hours)
 	const TTNT  = 18000;		// Time to next token: 18000 seconds (5 hours)
-	const MTTNA = 100;			// Micro-Time to next access: 100 micro-seconds
+	const MTTNA = 10;			// Micro-Time to next access: 100 micro-seconds
 
 	const OK                   = 0;
 

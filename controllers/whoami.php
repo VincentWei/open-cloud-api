@@ -27,7 +27,7 @@
  * limitations under the License.
  */
 
-class Whoami extends CI_Controller {
+class Whoami extends MY_Controller {
 
 	protected $_endpoint_list = array (
 					'return_my_ip_address' => '/whoami/ip_address',
@@ -44,15 +44,21 @@ class Whoami extends CI_Controller {
 	public function ip_address () {
 		$this->load->helper ('misc');
 
-		$this->output->set_content_type('application/json; charset=utf-8');
+		if (!parent::_check_callback ($data)) {
+			return;
+		}
+
 		$data['endpoint'] = $this->_endpoint_list['return_my_ip_address'];
 		$data['message'] = get_real_ip ();
 		$this->load->view('message', $data);
 	}
 
 	public function user_agent () {
+		if (!parent::_check_callback ($data)) {
+			return;
+		}
+
 		$user_agent = isset ($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'unknown';
-		$this->output->set_content_type('application/json; charset=utf-8');
 		$data['endpoint'] = $this->_endpoint_list['return_my_user_agent'];
 		$data['message'] = $user_agent;
 		$this->load->view('message', $data);
@@ -60,7 +66,10 @@ class Whoami extends CI_Controller {
 
 	/* currently not work */
 	protected function browser () {
-		$this->output->set_content_type('application/json; charset=utf-8');
+		if (!parent::_check_callback ($data)) {
+			return;
+		}
+
 		$data['endpoint'] = $this->_endpoint_list['return_my_browser'];
 		$data['items'] = get_browser (NULL, TRUE);
 		$this->load->view('list', $data);

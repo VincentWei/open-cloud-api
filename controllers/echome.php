@@ -47,15 +47,14 @@ class Echome extends MY_Controller {
 			return;
 		}
 
-		if (!parent::_check_callback ($data)) {
-			return;
-		}
-
 		if (!parent::_check_token ($token, $endpoint_name, $param)) {
 			return;
 		}
 
-		$this->output->set_content_type('application/json; charset=utf-8');
+		if (!parent::_check_callback ($data)) {
+			return;
+		}
+
 		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
 		$data['message'] = $param;
 		$this->load->view('message', $data);
@@ -68,15 +67,14 @@ class Echome extends MY_Controller {
 			return;
 		}
 
-		if (!parent::_check_callback ($data)) {
-			return;
-		}
-
 		if (!parent::_check_token ($token, $endpoint_name, $param)) {
 			return;
 		}
 
-		$this->output->set_content_type('application/json; charset=utf-8');
+		if (!parent::_check_callback ($data)) {
+			return;
+		}
+
 		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
 		$data['message'] = md5($param);
 		$this->load->view('message', $data);

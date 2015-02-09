@@ -42,6 +42,12 @@ class MY_Controller extends CI_Controller {
 			}
 		}
 
+		if (isset ($data['callback'])) {
+			$this->output->set_content_type('application/javascript; charset=utf-8');
+		}
+		else {
+			$this->output->set_content_type('application/json; charset=utf-8');
+		}
 		return TRUE;
 	}
 

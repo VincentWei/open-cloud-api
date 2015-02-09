@@ -60,7 +60,6 @@ class Cryptography extends MY_Controller {
 			return;
 		}
 
-		$this->output->set_content_type('application/json; charset=utf-8');
 		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
 		$data['message'] = hash ($algo, $param);
 		$this->load->view('message', $data);
@@ -86,7 +85,6 @@ class Cryptography extends MY_Controller {
 			return;
 		}
 
-		$this->output->set_content_type('application/json; charset=utf-8');
 		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
 		$data['message'] = hash_hmac ($algo, $param, $key);
 		$this->load->view('message', $data);

@@ -27,7 +27,7 @@
  * limitations under the License.
  */
 
-class Access_Token extends CI_Controller {
+class Access_Token extends MY_Controller {
 
 	protected $_endpoint_list = array (
 					'get_access_token' => '/access_token/get/{app_key}/{caller_id}',
@@ -39,24 +39,12 @@ class Access_Token extends CI_Controller {
 		$this->load->view('usage', $data);
 	}
 
-	protected function _check_callback (&$data) {
-		if (isset ($_GET['callback'])) {
-			$data['callback'] = $_GET['callback'];
-			if (!preg_match ("/^[a-zA-Z][a-zA-Z0-9_]*$/", $data['callback'])) {
-				show_error ('Bad callback parameter.', 400);
-				return FALSE;
-			}
-		}
-
-		return TRUE;
-	}
-
 	public function get ($app_key, $caller_id) {
 		if (!isset ($app_key) || !isset ($caller_id)) {
 			return;
 		}
 
-		if (!$this->_check_callback ($data)) {
+		if (!parent::_check_callback ($data)) {
 			return;
 		}
 
@@ -70,7 +58,6 @@ class Access_Token extends CI_Controller {
 				show_error ('Internal server error.', 500);
 			}
 			else {
-				$this->output->set_content_type('application/json; charset=utf-8');
 				$data['endpoint'] = $this->_endpoint_list['get_access_token'];
 				$data['message'] = $token;
 				$this->load->view('message', $data);
