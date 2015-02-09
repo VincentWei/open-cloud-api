@@ -34,5 +34,14 @@ $ret_info['endpoint'] = $endpoint;
 $ret_info['elapsed_time'] = '{elapsed_time}';
 $ret_info['memory_usage'] = '{memory_usage}';
 
+if (isset ($callback)) {
+	echo "/**/$callback(";
+}
+
 echo json_encode ($ret_info, JSON_BIGINT_AS_STRING | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+if (isset ($callback)) {
+	echo ')';
+}
+
 echo PHP_EOL;
