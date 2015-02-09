@@ -56,13 +56,13 @@ class Echome extends MY_Controller {
 		}
 
 		$this->output->set_content_type('application/json; charset=utf-8');
-		$data['endpoint'] = $this->_endpoint_list['echo_plain'];
+		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
 		$data['message'] = $param;
 		$this->load->view('message', $data);
 	}
 
 	public function md5_hashed ($token, $param = 'nothing') {
-		$endpoint_name = 'echo_md5';
+		$endpoint_name = 'echo_md5_hashed';
 
 		if (!isset ($token)) {
 			return;
@@ -77,7 +77,7 @@ class Echome extends MY_Controller {
 		}
 
 		$this->output->set_content_type('application/json; charset=utf-8');
-		$data['endpoint'] = $this->_endpoint_list['echo_md5'];
+		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
 		$data['message'] = md5($param);
 		$this->load->view('message', $data);
 	}
