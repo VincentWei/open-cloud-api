@@ -30,7 +30,7 @@
 class Access_Token extends CI_Controller {
 
 	protected $_endpoint_list = array (
-					'get_access_token' => '/access_token/get/{app_key}',
+					'get_access_token' => '/access_token/get/{app_key}/{caller_id}',
 				);
 
 	public function index() {
@@ -39,14 +39,14 @@ class Access_Token extends CI_Controller {
 		$this->load->view('usage', $data);
 	}
 
-	public function get ($app_key) {
-		if (!isset ($app_key)) {
+	public function get ($app_key, $caller_id) {
+		if (!isset ($app_key) || !isset ($caller_id)) {
 			return;
 		}
 
-		if (preg_match ("/^[a-z0-9]{64}$/", $app_key)) {
+		if (preg_match ("/^[a-z0-9]{64}$/", $app_key) && preg_match ("/^[a-z0-9]{32}$/", $caller_id)) {
 			$this->load->model ('Access_token_model', '', TRUE);
-			$token = $this->Access_token_model->generate ($app_key);
+			$token = $this->Access_token_model->generate ($app_key, $caller_id);
 			if ($token === Access_token_model::ERR_NO_SUCH_APP_KEY) {
 				show_error ('No such app key.', 400);
 			}
@@ -61,7 +61,7 @@ class Access_Token extends CI_Controller {
 			}
 		}
 		else {
-			show_error ('Bad app key.', 400);
+			show_error ('Bad app key or caller identifier.', 400);
 		}
 	}
 }

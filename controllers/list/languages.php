@@ -55,13 +55,13 @@ class Languages extends CI_Controller {
 	}
 
 	protected function _check_token ($token, $endpoint, $param) {
-		if (!preg_match ("/^[a-z0-9]{32}$/", $token)) {
+		if (!preg_match ("/^[a-z0-9]{64}$/", $token)) {
 			show_error ('Bad access token.', 400);
 			return FALSE;
 		}
 
-		$this->load->model ('Access_token_model');
-		switch ($this->Access_token_model->log_access ($token, $endpoint, $param)) {
+		$this->load->model ('Access_token_model', '', TRUE);
+		switch ($this->Access_token_model->validate_and_log_access ($token, $endpoint, $param)) {
 		case Access_token_model::ERR_NO_SUCH_TOKEN:
 			show_error ('No such access token.', 400);
 			return FALSE;

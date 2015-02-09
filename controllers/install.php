@@ -50,20 +50,34 @@ class Install extends CI_Controller {
 		$data['message'] = '';
 		if ($this->db->table_exists ('fse_app_keys') === FALSE) {
 			$this->load->dbforge ();
-			$this->dbforge->add_field ('app_key varchar(128) NOT NULL');
+			$this->dbforge->add_field ('app_key varchar(64) NOT NULL');
 			$this->dbforge->add_field ('fse_id varchar(32) NOT NULL');
 			$this->dbforge->add_field ('app_name varchar(32) NOT NULL');
 			$this->dbforge->add_field ('app_desc varchar(255) NOT NULL');
 			$this->dbforge->add_field ('app_url varchar(255) DEFAULT NULL');
 			$this->dbforge->add_field ('app_icon_url varchar(255) DEFAULT NULL');
 			$this->dbforge->add_field ('status tinyint(4) NOT NULL DEFAULT \'1\'');
-			$this->dbforge->add_field ('last_token varchar(32) NOT NULL DEFAULT \'\'');
-			$this->dbforge->add_field ('token_time datetime NOT NULL DEFAULT \'2015-01-01 00:00:00\'');
 			$this->dbforge->add_field ('create_time datetime NOT NULL');
 			$this->dbforge->add_key ('app_key', TRUE);
-			$this->dbforge->add_key (array('fse_id', 'app_name'));
 			$this->dbforge->create_table ('fse_app_keys');
+			$this->db->query ("ALTER TABLE fse_app_keys ADD UNIQUE KEY idx_fse_id_app_name (fse_id, app_name)");
 			$data['message'] .= 'fse_app_keys created. ';
+		}
+
+		if ($this->db->table_exists ('fse_app_access_tokens') === FALSE) {
+			$this->load->dbforge ();
+			$this->dbforge->add_field ('app_key varchar(64) NOT NULL');
+			$this->dbforge->add_field ('client_id varchar(32) NOT NULL');
+			$this->dbforge->add_field ('access_token varchar(64) NOT NULL');
+			$this->dbforge->add_field ('create_time datetime NOT NULL');
+			$this->dbforge->add_field ('access_microtime bigint(20) unsigned NOT NULL');
+			$this->dbforge->add_key ('app_key', TRUE);
+			$this->dbforge->add_key ('client_id', TRUE);
+			$this->dbforge->add_key ('access_microtime');
+			$this->dbforge->add_key ('create_time');
+			$this->dbforge->create_table ('fse_app_access_tokens');
+			$this->db->query ("ALTER TABLE fse_app_access_tokens ADD UNIQUE KEY idx_access_token (access_token)");
+			$data['message'] .= 'fse_app_access_tokens created. ';
 		}
 
 		if ($this->db->table_exists ('api_country_codes') === FALSE) {

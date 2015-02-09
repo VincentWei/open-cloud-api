@@ -29,9 +29,9 @@
 
 class Access_token_model extends CI_Model {
 
-	const TTL  = 36000;		// Time to live: 36000 seconds (10 hours)
-	const TTNT = 18000;		// Time to next token: 18000 seconds (5 hours)
-	const TTNA = 1;			// Time to next access: 1 second
+	const TTL   = 36000;		// Time to live: 36000 seconds (10 hours)
+	const TTNT  = 18000;		// Time to next token: 18000 seconds (5 hours)
+	const MTTNA = 100;			// Micro-Time to next access: 100 micro-seconds
 
 	const OK                   = 0;
 
@@ -54,114 +54,79 @@ class Access_token_model extends CI_Model {
 		$this->_cache_path = ($path == '') ? APPPATH.'cache/' : $path;
 	}
 
-	protected function _get_token_path ($token) {
+	protected function _get_app_log_file_path ($app_key) {
 		$full_dir = $this->_cache_path;
-		$full_dir .= $token[0] . '/';
-		$full_dir .= $token[1] . '/';
-		$full_dir .= $token[2] . '/';
+		$full_dir .= $app_key[0] . $app_key[1] . '/';
+		$full_dir .= $app_key[2] . $app_key[3] . '/';
+		$full_dir .= $app_key[4] . $app_key[5] . '/';
 		if (!is_dir ($full_dir)) {
 			if (!mkdir ($full_dir, 0775, true)) {
 				return FALSE;
 			}
 		}
 
-		return $full_dir . $token;
+		return $full_dir . $app_key;
 	}
 
-	public function generate ($app_key) {
-		$sql = 'SELECT fse_id, app_name, last_token, UNIX_TIMESTAMP(token_time) AS token_ctime
-	FROM fse_app_keys WHERE app_key=? AND status=1';
+	public function generate ($app_key, $client_id) {
+		$sql = 'SELECT fse_id FROM fse_app_keys WHERE app_key=? AND status=1';
 		$query = $this->db->query ($sql, array ($app_key));
 		if ($query->num_rows() == 0) {
 			return self::ERR_NO_SUCH_APP_KEY;
 		}
 
-		$row = $query->row_array (0);
-
-		if (strlen ($row['last_token']) == 32) {
-			// Remove the old token file if no logged message
-			$last_token_file = $this->_get_token_path ($row['last_token']);
-			clearstatcache ();
-			if (file_exists ($last_token_file)) {
-				if (time() < $row['token_ctime'] + self::TTNT) {
-					return $row['last_token'];
-				}
-				if (filesize ($last_token_file) < 80)
-					unlink ($last_token_file);
+		$sql = 'SELECT access_token, UNIX_TIMESTAMP(create_time) AS create_timestamp
+	FROM fse_app_access_tokens WHERE app_key=? AND client_id=?';
+		$query = $this->db->query ($sql, array ($app_key, $client_id));
+		if ($query->num_rows() > 0) {
+			$row = $query->row ();
+			if (time() < $row->create_timestamp + self::TTNT) {
+				return $row->access_token;
 			}
 		}
 
-
-		$token = hash_hmac ('md5', $row ['fse_id'] . $row['app_name'] . time(), $app_key);
-		$sql = 'UPDATE fse_app_keys SET last_token=?, token_time=NOW() WHERE app_key=?';
-		$this->db->query ($sql, array ($token, $app_key));
-
-		if (!$fp = @fopen ($this->_get_token_path ($token), 'w')) {
+		$token = hash_hmac ('sha256', $client_id . microtime(), $app_key);
+		$sql = 'INSERT INTO fse_app_access_tokens (app_key, client_id, access_token, create_time, access_microtime)
+	VALUES (?, ?, ?, NOW(), 0) ON DUPLICATE KEY UPDATE access_token=?, access_microtime=0';
+		$this->db->query ($sql, array ($app_key, $client_id, $token, $token));
+		if ($this->_get_app_log_file_path ($app_key) === FALSE) {
 			return self::ERR_FILE_SYSTEM;
 		}
-
-		$ctime = '' . time();
-		flock ($fp, LOCK_EX);
-		fwrite ($fp, "$ctime\n");
-		fwrite ($fp, "$app_key\n");
-		flock ($fp, LOCK_UN);
-		fclose ($fp);
 
 		return $token;
 	}
 
-	public function validate ($token) {
-		$token_path = $this->_get_token_path ($token);
-
-		clearstatcache ();
-		$stat = stat ($token_path);
-		if ($stat === FALSE) {
+	public function validate_and_log_access ($token, $endpoint, $param = 'na') {
+		$sql = 'SELECT app_key, client_id, UNIX_TIMESTAMP(create_time) AS create_timestamp, access_microtime FROM fse_app_access_tokens WHERE access_token=?';
+		$query = $this->db->query ($sql, array ($token));
+		if ($query->num_rows() == 0) {
 			return self::ERR_NO_SUCH_TOKEN;
 		}
+		$row = $query->row ();
 
-		if (time() >  $stat['ctime'] + self::TTL) {
-			if ($stat['size'] < 80)
-				unlink ($token_path);
+		if (time() >  $row->create_timestamp + self::TTL) {
 			return self::ERR_TOKEN_EXPIRED;
 		}
 
-		return self::OK;
-	}
-
-	public function log_access ($token, $endpoint, $param = 'na') {
-		$token_path = $this->_get_token_path ($token);
-
-		if (!file_exists ($token_path)) {
-			return self::ERR_NO_SUCH_TOKEN;
-		}
-
-		if (!$fp = @fopen ($token_path, 'r+')) {
-			return self::ERR_FILE_SYSTEM;
-		}
-
-		$fstat = fstat ($fp);
-
-		$ctime = trim (fgets($fp));
-		if (time() >  $ctime + self::TTL) {
-			if ($fstat['size'] < 80)
-				unlink ($token_path);
-			return self::ERR_TOKEN_EXPIRED;
-		}
-
-		/*
-		if (time() <  $fstat['mtime'] + self::TTNA) {
-			fclose ($fp);
+		$curr_mtime = (int)(microtime (TRUE) * 1000);
+		if (($curr_mtime - $row->access_microtime) < self::MTTNA) {
 			return self::ERR_TOO_FAST;
 		}
-		*/
+
+		$sql = 'UPDATE fse_app_access_tokens SET access_microtime=? WHERE access_token=?';
+		$query = $this->db->query ($sql, array ($curr_mtime, $token));
+
+		$log_file_path = $this->_get_app_log_file_path ($row->app_key);
+		if (!$fp = @fopen ($log_file_path, 'a')) {
+			return self::ERR_FILE_SYSTEM;
+		}
 
 		$this->load->helper ('misc');
 
 		$client_ip = get_real_ip ();
 		$user_agent = isset ($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'unknown';
-		$message = date ('Y-m-d H:i:s') . "\n\tclient_ip: $client_ip\n\tuser_agent: $user_agent\n\tendpoint: $endpoint ($param)\n";
+		$message = date ('Y-m-d H:i:s') . ' ' . $row->client_id . " ($token)" . "\n\tclient_ip: $client_ip\n\tuser_agent: $user_agent\n\tendpoint: $endpoint ($param)\n";
 		flock ($fp, LOCK_EX);
-		fseek ($fp, 0, SEEK_END);
 		fwrite ($fp, $message);
 		flock ($fp, LOCK_UN);
 		fclose ($fp);
