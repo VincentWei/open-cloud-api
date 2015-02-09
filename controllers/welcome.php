@@ -30,9 +30,11 @@
 class Welcome extends CI_Controller {
 
 	protected $_endpoint_list = array (
-			'installation' => '/install/',
-			'access_token' => '/access_token/',
-			'data_in_list' => '/list/',
+			'installation' => '/install',
+			'access_token' => '/access_token',
+			'whoami' => '/whoami',
+			'echome' => '/echome',
+			'data_in_list' => '/list',
 		);
 
 	public function index() {
