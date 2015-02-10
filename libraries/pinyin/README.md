@@ -5,9 +5,11 @@ Pinyin
 [![Latest Stable Version](https://poser.pugx.org/overtrue/pinyin/v/stable.svg)](https://packagist.org/packages/overtrue/pinyin) [![Total Downloads](https://poser.pugx.org/overtrue/pinyin/downloads.svg)](https://packagist.org/packages/overtrue/pinyin) [![Latest Unstable Version](https://poser.pugx.org/overtrue/pinyin/v/unstable.svg)](https://packagist.org/packages/overtrue/pinyin) [![License](https://poser.pugx.org/overtrue/pinyin/license.svg)](https://packagist.org/packages/overtrue/pinyin)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/overtrue/pinyin/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/overtrue/pinyin/?branch=master)
 
-基于[CC-CEDICT](http://cc-cedict.org/wiki/)词典的中文转拼音工具, 更准确的汉字转拼音解决方案。 
+基于[CC-CEDICT](http://cc-cedict.org/wiki/)词典的中文转拼音工具, 更准确的汉字转拼音解决方案。
 
-SAE服务地址：http://string2pinyin.sinaapp.com/doc.html
+**该版本针对 Open Cloud API 项目做了适当优化，使用 APC 缓存装载词典，可提高 0.5 倍的速度。**
+
+要启用该优化，请调用 `set_real_cache` 函数设置缓存对象、缓存获取和设置函数。详情请参加 Open Cloud API 中的相应用法。
 
 ```php
 use \Overtrue\Pinyin\Pinyin; 
