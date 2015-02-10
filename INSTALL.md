@@ -22,7 +22,12 @@
 			RewriteCond %{REQUEST_FILENAME}/index.php !-f
 			RewriteRule . index.php [L]
 		</IfModule>
+For nginx add this to your server config:
 
+ 		location / {
+        	try_files $uri $uri/ /index.php?/$request_uri;
+        }
+        
 ### Install Open Cloud API for development
 
 1.	Get the source code from GitHub or download the source code tarball and extract the tarball into `application/` directory of your CodeIgniter installation. Note that this will overwrite the files in `application/` directory.
