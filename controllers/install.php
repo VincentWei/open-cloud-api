@@ -86,8 +86,8 @@ class Install extends CI_Controller {
 			$this->dbforge->add_field ('alpha_3_code varchar(3) NOT NULL');
 			$this->dbforge->add_field ('iso_name varchar(64) NOT NULL');
 			$this->dbforge->add_key ('numeric_code', TRUE);
-			$this->dbforge->add_key ('idx_alpha_2');
-			$this->dbforge->add_key ('idx_alpha_3');
+			$this->dbforge->add_key ('alpha_2_code');
+			$this->dbforge->add_key ('alpha_3_code');
 			$this->dbforge->create_table ('api_country_codes');
 			$data['message'] .= 'api_country_codes created. ';
 		}
