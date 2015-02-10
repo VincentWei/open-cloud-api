@@ -56,7 +56,7 @@ class Echome extends MY_Controller {
 		}
 
 		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
-		$data['message'] = $param;
+		$data['message'] = urldecode ($param);
 		$this->load->view('message', $data);
 	}
 
@@ -76,7 +76,7 @@ class Echome extends MY_Controller {
 		}
 
 		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
-		$data['message'] = md5($param);
+		$data['message'] = md5 (urldecode ($param));
 		$this->load->view('message', $data);
 	}
 }

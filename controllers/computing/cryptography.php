@@ -56,6 +56,7 @@ class Cryptography extends MY_Controller {
 			return;
 		}
 
+		$param = urldecode ($param);
 		if (!parent::_check_token ($token, $endpoint_name, "hash ($algo, $param)")) {
 			return;
 		}
@@ -81,6 +82,7 @@ class Cryptography extends MY_Controller {
 			return;
 		}
 
+		$param = urldecode ($param);
 		if (!parent::_check_token ($token, $endpoint_name, "hash_hmac ($algo, $param, $key)")) {
 			return;
 		}
