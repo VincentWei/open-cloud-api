@@ -27,6 +27,23 @@
  * limitations under the License.
  */
 
+if (!function_exists ('my_static_cache_get')) {
+	function my_static_cache_get ($cache_obj, $key) {
+		if (is_object ($cache_obj)) {
+			return $cache_obj->get ($key);
+		}
+		return FALSE;
+	}
+}
+
+if (!function_exists ('my_static_cache_set')) {
+	function my_static_cache_set ($cache_obj, $key, $data, $ttl) {
+		if (is_object ($cache_obj)) {
+			$cache_obj->save ($key, $data, $ttl);
+		}
+	}
+}
+
 class MY_Controller extends CI_Controller {
 
 	function __construct () {

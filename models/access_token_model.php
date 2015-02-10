@@ -87,7 +87,7 @@ class Access_token_model extends CI_Model {
 
 		$token = hash_hmac ('sha256', $client_id . microtime(), $app_key);
 		$sql = 'INSERT INTO fse_app_access_tokens (app_key, client_id, access_token, create_time, access_microtime)
-	VALUES (?, ?, ?, NOW(), 0) ON DUPLICATE KEY UPDATE access_token=?, access_microtime=0';
+	VALUES (?, ?, ?, NOW(), 0) ON DUPLICATE KEY UPDATE access_token=?, create_time=NOW(), access_microtime=0';
 		$this->db->query ($sql, array ($app_key, $client_id, $token, $token));
 		if ($this->_get_app_log_file_path ($app_key) === FALSE) {
 			return self::ERR_FILE_SYSTEM;

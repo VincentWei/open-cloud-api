@@ -27,24 +27,50 @@
  * limitations under the License.
  */
 
-class Welcome extends CI_Controller {
+class Chinese_Converter extends MY_Controller {
 
+	protected $_ttl_cache = 86400;
 	protected $_endpoint_list = array (
-			'installation' => '/install',
-			'access_token' => '/access_token',
-			'whoami' => '/whoami',
-			'echome' => '/echome',
-			'list' => '/list',
-			'map' => '/map',
-			'computing' => '/computing',
-		);
+					'translate_chinese' => '/map/chinse_converter/translate/{token}/{locale}{/text}',
+				);
 
-	public function index() {
+	public function index () {
 		$this->output->set_content_type('application/json; charset=utf-8');
 		$data['usage'] = $this->_endpoint_list;
 		$this->load->view('usage', $data);
 	}
+
+	public function translate ($token, $locale, $text = '汉语') {
+		$endpoint_name = 'translate_chinese';
+
+		if (!isset ($token) || !isset($locale)) {
+			return;
+		}
+
+		$locale = str_replace ('_', '-', $locale);
+		$locale = strtolower ($locale);
+		if (!in_array ($locale, array ('zh-cn', 'zh-tw', 'zh-hk', 'zh-mo', 'zh-sg', 'zh-my'))) {
+			show_error ('Bad locale.', 400);
+			return;
+		}
+
+		if (!$this->_check_callback ($data)) {
+			return;
+		}
+
+		if (!$this->_check_token ($token, $endpoint_name, "$locale ($text)")) {
+			return;
+		}
+
+		$this->load->driver ('cache', array('adapter' => 'apc', 'backup' => 'file'));
+		$params = array('cache_obj' => $this->cache, 'cache_get_func' => 'my_static_cache_get',
+				'cache_set_func' => 'my_static_cache_set');
+		$this->load->library ('ZhConverter', $params);
+		$data['message'] = $this->zhconverter->translate (urldecode ($text), $locale);
+		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
+		$this->load->view('message', $data);
+	}
+
 }
 
-/* End of file welcome.php */
-/* Location: ./application/controllers/welcome.php */
+/* End of file chinese_converter.php */
