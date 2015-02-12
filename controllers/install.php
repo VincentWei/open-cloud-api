@@ -29,6 +29,10 @@
 
 class Install extends CI_Controller {
 
+	private $curr_ver_major = 0;
+	private $curr_ver_minor = 2;
+	private $curr_ver_micro = 0;
+
 	protected $_endpoint_list = array (
 			'create_tables' => '/install/create_tables',
 			'create_test_app_key' => '/install/create_test_app_key',
@@ -40,14 +44,19 @@ class Install extends CI_Controller {
 		$this->load->view('usage', $data);
 	}
 
-	public function create_tables () {
-		$this->load->database ();
-		if ($this->db === FALSE) {
-			show_error ('Failed to initialize database.', 500);
-			return;
+	protected function _initialize_database (&$data) {
+		if ($this->db->table_exists ('api_version_info') === FALSE) {
+			$this->load->dbforge ();
+			$this->dbforge->add_field ('token_name varchar(16) NOT NULL');
+			$this->dbforge->add_field ('token_value varchar(255) NOT NULL');
+			$this->dbforge->add_key ('token_name', TRUE);
+			$this->dbforge->create_table ('api_version_info');
+			$this->db->query ("INSERT INTO api_version_info VALUES ('curr_ver_major', '0')");
+			$this->db->query ("INSERT INTO api_version_info VALUES ('curr_ver_minor', '2')");
+			$this->db->query ("INSERT INTO api_version_info VALUES ('curr_ver_micro', '0')");
+			$data['message'] .= 'api_version_info created. ';
 		}
 
-		$data['message'] = '';
 		if ($this->db->table_exists ('fse_app_keys') === FALSE) {
 			$this->load->dbforge ();
 			$this->dbforge->add_field ('app_key varchar(64) NOT NULL');
@@ -139,8 +148,45 @@ class Install extends CI_Controller {
 			$data['message'] .= 'api_language_localized_names created. ';
 		}
 
+	}
+
+	protected function _upgrade_database ($db_ver_info, &$data) {
+		if ($db_ver_info['curr_ver_major'] == $this->curr_ver_major
+				&& $db_ver_info['curr_ver_minor'] == $this->curr_ver_minor
+				&& $db_ver_info['curr_ver_micro'] == $this->curr_ver_micro) {
+			return;
+		}
+	}
+
+	public function create_tables () {
+		$this->load->database ();
+		if ($this->db === FALSE) {
+			show_error ('Failed to initialize database.', 500);
+			return;
+		}
+
+		$data['message'] = '';
+		if ($this->db->table_exists ('api_version_info') === FALSE) {
+			$this->_initialize_database ($data);
+		}
+		else {
+			$sql = 'SELECT token_name, token_value FROM api_version_info WHERE token_name LIKE \'curr_ver_%\'';
+			$query = $this->db->query ($sql);
+			if ($query->num_rows() > 0) {
+				$db_ver_info = array ();
+				foreach ($query->result() as $row) {
+					$db_ver_info[$row->token_name] = $row->token_value;
+				}
+				$this->_upgrade_database ($db_ver_info, $data);
+			}
+			else {
+				show_error ('No current version information in database .', 500);
+				return;
+			}
+		}
+
 		if (strlen ($data['message']) == 0) {
-			$data['message'] = 'No any table newly created.';
+			$data['message'] = 'No any table created or upgraded.';
 		}
 		$this->output->set_content_type ('application/json; charset=utf-8');
 		$data['endpoint'] = $this->_endpoint_list['create_tables'];
@@ -154,9 +200,10 @@ class Install extends CI_Controller {
 			return;
 		}
 
-		$app_key = hash_hmac ("sha256", 'test', 'nobody');
-		$res = $this->db->query ("INSERT IGNORE fse_app_keys (app_key, fse_id, app_name, app_desc, app_url, app_icon_url, create_time) VALUES (?, ?, ?, ?, ?, ?, NOW())",
-			array ($app_key, 'nobody' , 'Test', 'Test', NULL, NULL));
+		$app_key = hash_hmac ('sha256', 'test', 'nobody');
+		$res = $this->db->query ('INSERT IGNORE fse_app_keys
+	(app_key, fse_id, app_name, app_desc, app_url, app_icon_url, create_time) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+			array ($app_key, 'nobody' , 'Test', 'This is a test app.', NULL, NULL));
 		if ($this->db->affected_rows() == 0) {
 			$data['message'] = 'Already created!';
 		}
