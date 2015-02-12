@@ -101,7 +101,7 @@ class Countries extends CI_Controller {
 				$data['message'] = 'Loaded from database.';
 
 				$this->load->database ();
-				$sql = 'SELECT A.numeric_code, B.localized_name AS name
+				$sql = 'SELECT A.numeric_code, A.alpha_2_code, B.localized_name AS name
 	FROM api_country_codes AS A, api_country_division_localized_names AS B
 	WHERE A.numeric_code=B.division_id AND B.locale=?
 	ORDER BY A.numeric_code';
@@ -110,7 +110,7 @@ class Countries extends CI_Controller {
 				if ($query->num_rows() == 0) {
 					/* try with language */
 					$lang = substr ($locale, 0, 2);
-					$sql = 'SELECT A.numeric_code, B.localized_name AS name
+					$sql = 'SELECT A.numeric_code, A.alpha_2_code, B.localized_name AS name
 	FROM api_country_codes AS A, api_country_division_localized_names AS B
 	WHERE A.numeric_code=B.division_id AND B.locale=?
 	ORDER BY A.numeric_code';
@@ -128,7 +128,7 @@ class Countries extends CI_Controller {
 				$data['message'] = 'Loaded from database.';
 
 				$this->load->database ();
-				$sql = 'SELECT A.numeric_code, B.localized_name AS name
+				$sql = 'SELECT A.numeric_code, A.alpha_2_code, B.localized_name AS name
 	FROM api_country_codes AS A, api_country_division_localized_names AS B
 	WHERE A.numeric_code=B.division_id AND B.locale=?
 	ORDER BY A.numeric_code';
@@ -144,7 +144,7 @@ class Countries extends CI_Controller {
 				$data['message'] = 'Loaded from database.';
 
 				$this->load->database ();
-				$sql = 'SELECT numeric_code, iso_name AS name FROM api_country_codes ORDER BY numeric_code';
+				$sql = 'SELECT numeric_code, alpha_2_code, iso_name AS name FROM api_country_codes ORDER BY numeric_code';
 				$query = $this->db->query ($sql);
 				$result = $query->result_array ();
 
