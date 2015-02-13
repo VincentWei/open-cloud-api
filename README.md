@@ -11,7 +11,7 @@ Open Cloud API is built on [CodeIgniter](http://www.codeigniter.com/) V2.2.1, wh
 The features of Open Cloud API are as follow:
 
 * All data is sent and received as JSON. This makes the APIs can be used by almost all apps (Desktop apps, Server apps, Android apps, iOS apps, Web apps, and so on).
-* This project is a community-driven project. Over time, we will provide rich APIs for apps.
+* This project is a community-driven project. Over time, we will provide a rich set of APIs for apps.
 * All APIs provided by this project (via http://api.fullstackengineer.net) are free. Any Internet apps can use the APIs.
 
 ## About the initiator
