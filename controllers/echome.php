@@ -31,7 +31,8 @@ class Echome extends MY_Controller {
 
 	protected $_endpoint_list = array (
 					'echo_untouched' => '/echome/untouched/{token}{/param}',
-					'echo_md5_hashed' => '/echome/md5_hashed/{token}{/param}',
+					'echo_base64' => '/echome/base64/{token}{/param}',
+					'echo_app_keyed_hash' => '/echome/app_keyed_hash/{token}/{algo}{/param}',
 				);
 
 	public function index() {
@@ -40,33 +41,61 @@ class Echome extends MY_Controller {
 		$this->load->view('usage', $data);
 	}
 
-	public function untouched ($token, $param = 'nothing') {
+	public function untouched ($token, $param = '') {
 		$endpoint_name = 'echo_untouched';
 
 		if (!isset ($token)) {
 			return;
 		}
 
-		if (!parent::_check_token ($token, $endpoint_name, $param)) {
-			return;
-		}
-
 		if (!parent::_check_callback ($data)) {
 			return;
 		}
 
+		$param = urldecode ($param);
+		if (!parent::_check_token ($token, $endpoint_name, $param)) {
+			return;
+		}
+
 		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
-		$data['message'] = urldecode ($param);
+		$data['message'] = $param;
 		$this->load->view('message', $data);
 	}
 
-	public function md5_hashed ($token, $param = 'nothing') {
-		$endpoint_name = 'echo_md5_hashed';
+	public function base64 ($token, $param = '') {
+		$endpoint_name = 'echo_base64';
 
 		if (!isset ($token)) {
 			return;
 		}
 
+		if (!parent::_check_callback ($data)) {
+			return;
+		}
+
+		$param = urldecode ($param);
+		if (!parent::_check_token ($token, $endpoint_name, $param)) {
+			return;
+		}
+
+		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
+		$data['message'] = base64_encode ($param);
+		$this->load->view('message', $data);
+	}
+
+	public function app_keyed_hash ($token, $algo, $param = '') {
+		$endpoint_name = 'echo_app_keyed_hash';
+
+		if (!isset ($token) || !isset ($algo)) {
+			return;
+		}
+
+		if (!in_array ($algo, hash_algos ())) {
+			show_error ('Bad hash algorithm.', 400);
+			return;
+		}
+
+		$param = urldecode ($param);
 		if (!parent::_check_token ($token, $endpoint_name, $param)) {
 			return;
 		}
@@ -76,7 +105,7 @@ class Echome extends MY_Controller {
 		}
 
 		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
-		$data['message'] = md5 (urldecode ($param));
+		$data['message'] = hash_hmac ($algo, $param, $this->app_key);
 		$this->load->view('message', $data);
 	}
 }

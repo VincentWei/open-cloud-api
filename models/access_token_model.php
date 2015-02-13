@@ -131,6 +131,8 @@ class Access_token_model extends CI_Model {
 		flock ($fp, LOCK_UN);
 		fclose ($fp);
 
+		$CI =& get_instance();
+		$CI->app_key = $row->app_key;
 		return self::OK;
 	}
 }
