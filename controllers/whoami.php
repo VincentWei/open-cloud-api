@@ -64,14 +64,15 @@ class Whoami extends MY_Controller {
 		$this->load->view('message', $data);
 	}
 
-	/* currently not work */
-	protected function browser () {
+	public function browser () {
 		if (!parent::_check_callback ($data)) {
 			return;
 		}
 
 		$data['endpoint'] = $this->_endpoint_list['return_my_browser'];
 		$data['items'] = get_browser (NULL, TRUE);
+		// FIXME: A work-around for bad character returned by get_browser
+		$data['items']['browser_name_regex'] = trim ($data['items']['browser_name_regex'], '§');
 		$this->load->view('list', $data);
 	}
 }
