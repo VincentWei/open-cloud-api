@@ -30,6 +30,7 @@
 class Cryptography extends MY_Controller {
 
 	protected $_endpoint_list = array (
+					'get_algos' => '/computing/cryptography/algos',
 					'get_hash' => '/computing/cryptography/hash/{token}/{algo}{/param}',
 					'get_hash_hmac' => '/computing/cryptography/hash_hmac/{token}/{algo}/{key}{/param}',
 				);
@@ -40,6 +41,16 @@ class Cryptography extends MY_Controller {
 		$this->load->view('usage', $data);
 	}
 
+	public function algos () {
+		if (!parent::_check_callback ($data)) {
+			return;
+		}
+
+		$data['items'] = hash_algos ();
+		$data['endpoint'] = $this->_endpoint_list['get_algos'];
+		$this->load->view('list', $data);
+	}
+
 	public function hash ($token, $algo, $param = '') {
 		$endpoint_name = 'get_hash';
 
@@ -47,6 +58,7 @@ class Cryptography extends MY_Controller {
 			return;
 		}
 
+		$algo = urldecode ($algo);
 		if (!in_array ($algo, hash_algos ())) {
 			show_error ('Bad hash algorithm.', 400);
 			return;
@@ -73,6 +85,7 @@ class Cryptography extends MY_Controller {
 			return;
 		}
 
+		$algo = urldecode ($algo);
 		if (!in_array ($algo, hash_algos ())) {
 			show_error ('Bad hash algorithm.', 400);
 			return;
