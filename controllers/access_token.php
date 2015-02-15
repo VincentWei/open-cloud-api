@@ -35,7 +35,7 @@ class Access_Token extends MY_Controller {
 
 	public function index() {
 		$this->output->set_content_type('application/json; charset=utf-8');
-		$data['usage'] = $_endpoint_list;
+		$data['usage'] = $this->_endpoint_list;
 		$this->load->view('usage', $data);
 	}
 
@@ -48,7 +48,7 @@ class Access_Token extends MY_Controller {
 			return;
 		}
 
-		if (preg_match ("/^[a-z0-9]{64}$/", $app_key) && preg_match ("/^[a-z0-9]{32}$/", $caller_id)) {
+		if (preg_match ("/^[a-f0-9]{64}$/", $app_key) && preg_match ("/^[a-f0-9]{32}$/", $caller_id)) {
 			$this->load->model ('Access_token_model', '', TRUE);
 			$token = $this->Access_token_model->generate ($app_key, $caller_id);
 			if ($token === Access_token_model::ERR_NO_SUCH_APP_KEY) {
