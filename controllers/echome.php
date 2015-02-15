@@ -90,6 +90,7 @@ class Echome extends MY_Controller {
 			return;
 		}
 
+		$algo = urldecode ($algo);
 		if (!in_array ($algo, hash_algos ())) {
 			show_error ('Bad hash algorithm.', 400);
 			return;
