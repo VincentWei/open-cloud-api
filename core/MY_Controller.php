@@ -47,6 +47,7 @@ if (!function_exists ('my_static_cache_set')) {
 class MY_Controller extends CI_Controller {
 
 	function __construct () {
+		date_default_timezone_set("Etc/GMT-8");
 		parent::__construct ();
 	}
 

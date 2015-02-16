@@ -31,6 +31,7 @@ class Welcome extends CI_Controller {
 	protected $_endpoint_list = array (
 			'chinese_converter' => '/map/chinese_converter',
 			'chinese_pinyin' => '/map/chinese_pinyin',
+			'ip_address'=>'/map/ip_address',
 		);
 
 	public function index () {

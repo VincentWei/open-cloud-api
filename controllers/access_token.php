@@ -64,7 +64,11 @@ class Access_Token extends MY_Controller {
 			}
 		}
 		else {
-			show_error ('Bad app key or caller identifier.', 400);
+			if(!preg_match ("/^[a-z0-9]{32}$/", $caller_id)) {
+				show_error('caller_id length must be 32',400);
+			} else {
+				show_error ('Bad app key or caller identifier.', 400);
+			}
 		}
 	}
 }
