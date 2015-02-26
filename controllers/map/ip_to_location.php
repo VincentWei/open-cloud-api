@@ -8,11 +8,10 @@
  *
  * For more information, please refer to:
  *
- *		http://www.fullstackengineer.net/zh/project/open-cloud-api-zh
- *		http://www.fullstackengineer.net/en/project/open-cloud-api-en
+ *	    http://www.fullstackengineer.net/zh/project/open-cloud-api-zh
+ *	    http://www.fullstackengineer.net/en/project/open-cloud-api-en
  *
- * Copyright (C) 2015 WEI Yongming
- * <http://www.fullstackengineer.net/zh/engineer/weiyongming>
+ * Copyright (C) 2015 Ai Di
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +26,11 @@
  * limitations under the License.
  */
 
-class Ip_Address extends MY_Controller {
+class Ip_To_Location extends MY_Controller {
 
 	protected $_ttl_cache = 86400;
 	protected $_endpoint_list = array (
-					'ip_address' => '/map/ip_address/get/{token}/{ip}',
+					'get_location_by_ip' => '/map/ip_to_location/get/{token}/{ip}',
 				);
 
 	public function index () {
@@ -40,35 +39,42 @@ class Ip_Address extends MY_Controller {
 		$this->load->view('usage', $data);
 	}
 
-	public function get ($token, $ip) {
-		$endpoint_name = 'ip_address';
-		$this->output->set_content_type('application/json; charset=utf-8');
+	public function get ($token, $ip = FALSE) {
+		$endpoint_name = 'get_location_by_ip';
+
+		if (!isset ($token)) {
+			return;
+		}
+
+		if ($ip === FALSE) {
+			$this->load->helper ('misc');
+			$ip = get_real_ip ();
+		}
+
+		if (!$this->_check_callback ($data)) {
+			return;
+		}
+
 		if (!$this->_check_token ($token, $endpoint_name, "$ip")) {
 			return;
 		}
 
-		$this->load->driver ('cache', array('adapter' => 'apc', 'backup' => 'file'));
-
 		$data['message'] = $ip;
 		$data['endpoint'] = $this->_endpoint_list[$endpoint_name];
 
+		require_once ('application/libraries/17mon/IP.class.php');
+		$data['items'] = IP::find ($ip);
+
+		/* FIXME: QQWry does not work
 		require_once ('application/libraries/qqwry/qqwry.php');
 		$QQWry = new QQWry;
-		$ifErr = $QQWry->QQWry($ip);
+		$ifErr = $QQWry->QQWry ($ip);
+		$data['extras'][0] = $QQWry->Country;
+		$data['extras'][1] = $QQWry->Local;
+		*/
 
-		$items = array();
-		$items['default']="$QQWry->Country $QQWry->Local";
-		$items['qqwry']="$QQWry->Country $QQWry->Local";
-		require_once ('application/libraries/17mon/IP.class.php');
-		$list = IP::find($ip);
-		if(count($list)>0) {
-			$items['17mon']=$list[0];
-			$items['default']=$list[0];
-		}
-		$data['items'] = $items;
 		$this->load->view('list', $data);
 	}
-
 }
 
-/* End of file chinese_converter.php */
+/* End of file ip_to_location.php */
