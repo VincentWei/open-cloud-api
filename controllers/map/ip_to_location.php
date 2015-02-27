@@ -30,7 +30,7 @@ class Ip_To_Location extends MY_Controller {
 
 	protected $_ttl_cache = 86400;
 	protected $_endpoint_list = array (
-					'get_location_by_ip' => '/map/ip_to_location/get/{token}/{ip}',
+					'get_location_by_ip' => '/map/ip_to_location/get/{token}{/ip}',
 				);
 
 	public function index () {
@@ -46,7 +46,7 @@ class Ip_To_Location extends MY_Controller {
 			return;
 		}
 
-		if ($ip === FALSE) {
+		if ($ip === FALSE || !preg_match ('/^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))$/', $ip)) {
 			$this->load->helper ('misc');
 			$ip = get_real_ip ();
 		}
@@ -55,7 +55,7 @@ class Ip_To_Location extends MY_Controller {
 			return;
 		}
 
-		if (!$this->_check_token ($token, $endpoint_name, "$ip")) {
+		if (!$this->_check_token ($token, $endpoint_name, $ip)) {
 			return;
 		}
 
