@@ -65,13 +65,11 @@ class Ip_To_Location extends MY_Controller {
 		require_once ('application/libraries/17mon/IP.class.php');
 		$data['items'] = IP::find ($ip);
 
-		/* FIXME: QQWry does not work
 		require_once ('application/libraries/qqwry/qqwry.php');
 		$QQWry = new QQWry;
 		$ifErr = $QQWry->QQWry ($ip);
-		$data['extras'][0] = $QQWry->Country;
-		$data['extras'][1] = $QQWry->Local;
-		*/
+		$data['extras'][0] = iconv ('gbk', 'utf-8', $QQWry->Country);
+		$data['extras'][1] = iconv ('gbk', 'utf-8', $QQWry->Local);
 
 		$this->load->view('list', $data);
 	}

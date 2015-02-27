@@ -133,7 +133,11 @@ class QQWry
             $this->Country = 'Localhost';
             return;
         }
-        else if (preg_match("/^(192)/", $dotip)) {
+        else if (preg_match("/^(10.)/", $dotip)) {
+            $this->Country = 'LAN';
+            return;
+        }
+        else if (preg_match("/^(192.168.)/", $dotip)) {
             $this->Country = 'LAN';
             return;
         }
@@ -186,7 +190,7 @@ class QQWry
             $this->getCountry();
         }
         else {
-            $this->Country = '未知';
+            $this->Country = 'Unknown';
             $this->Local = '';
         }
 
